@@ -234,7 +234,7 @@ const CompanyTable = () => {
                                             <td className="py-3 px-4">{company.email}</td>
                                             <td className="py-3 px-4">{company.website}</td>
                                             <td className="py-3 px-4">
-                                                <img style={{ width: '50px', height: '50px' }} src={company.logo} alt={company.name} />
+                                                <img style={{ width: '100px', height: '100px' }} src={company.logo} alt={company.name} />
                                             </td>
                                             <td className="py-3 px-4">
                                                 <button onClick={() => handleEditClick(company)} className="text-blue-500 hover:underline">
