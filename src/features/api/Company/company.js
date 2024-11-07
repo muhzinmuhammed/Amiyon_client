@@ -12,9 +12,10 @@ const companyAuth = api.injectEndpoints({
         }),
 
         allCompany: builder.query({
-            query: () => ({
-                url: '/v1/company/all_company',
+            query: ({ search = '', page = 1 }) => ({
+                url: `/v1/company/all_company`,
                 method: 'GET',
+                params: { search, page },
             }),
         }),
 

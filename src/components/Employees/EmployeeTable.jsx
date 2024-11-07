@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAddEmployeeMutation, useAllEmployeeQuery, useDeleteEmployeeMutation, useUpdateEmployeeMutation } from '../../features/api/Employee/employee';
-import { useAllCompanyQuery } from '../../features/api/Company/company';
+import { useAddEmployeeMutation, useAllEmployeeQuery, useDeleteEmployeeMutation, useUpdateEmployeeMutation,useAllCompaniesQuery } from '../../features/api/Employee/employee';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Swal from 'sweetalert2';
@@ -8,8 +7,17 @@ import { FaEdit } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 
 const EmployeeTable = () => {
-    const { data: employees, isLoading, error, refetch } = useAllEmployeeQuery();
-    const { data: companies, isLoading: companiesLoading, error: companiesError } = useAllCompanyQuery();
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [searchQuery, setSearchQuery] = useState('');
+    const { data: employees, isLoading, error, refetch } = useAllEmployeeQuery({
+        page: currentPage,
+        limit: itemsPerPage,
+        search: searchQuery
+    });
+    const { data: companies, isLoading: companiesLoading, error: companiesError } = useAllCompaniesQuery();
+    console.log(companiesError,"kkk");
+    
     const [addEmployee] = useAddEmployeeMutation();
     const [updateEmployee] = useUpdateEmployeeMutation();
     const [deleteEmployee] = useDeleteEmployeeMutation();

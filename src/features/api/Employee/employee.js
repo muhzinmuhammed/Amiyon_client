@@ -1,4 +1,3 @@
-
 import { api } from "../api";
 
 const employeeAuth = api.injectEndpoints({
@@ -14,6 +13,13 @@ const employeeAuth = api.injectEndpoints({
         allEmployee: builder.query({
             query: () => ({
                 url: '/v2/employee/find_employees',
+                method: 'GET',
+            }),
+        }),
+
+        allCompanies: builder.query({
+            query: () => ({
+                url: '/v2/employee/all_company',
                 method: 'GET',
             }),
         }),
@@ -39,6 +45,7 @@ const employeeAuth = api.injectEndpoints({
 export const { 
     useAddEmployeeMutation, 
     useAllEmployeeQuery, 
+    useAllCompaniesQuery,
     useUpdateEmployeeMutation, 
-    useDeleteEmployeeMutation // added export for deleteEmployee
+    useDeleteEmployeeMutation 
 } = employeeAuth;

@@ -1,5 +1,3 @@
-
-
 import { useState } from 'react';
 import { useAddCompanyMutation, useAllCompanyQuery, useUpdateCompanyMutation, useDeleteCompanyMutation } from '../../features/api/Company/company';
 import { ToastContainer, toast } from 'react-toastify';
@@ -9,10 +7,13 @@ import { FaEdit } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 
 const CompanyTable = () => {
-    const { data: companies, isLoading, error, refetch } = useAllCompanyQuery();
+    const [search, setSearch] = useState('');
+    const [page, setPage] = useState(1);
+    const { data: companies, isLoading, error, refetch } = useAllCompanyQuery({ search, page });
+
     const [addCompany] = useAddCompanyMutation();
     const [updateCompany] = useUpdateCompanyMutation();
-    const [deleteCompany] = useDeleteCompanyMutation(); // Add the delete mutation hook
+    const [deleteCompany] = useDeleteCompanyMutation();
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -134,7 +135,6 @@ const CompanyTable = () => {
         }
     };
 
-    // Function to handle delete company with SweetAlert2
     const handleDeleteCompany = (companyId) => {
         Swal.fire({
             title: 'Are you sure?',
@@ -178,13 +178,29 @@ const CompanyTable = () => {
         setErrors({});
     };
 
+    const handleSearchChange = (e) => {
+        setSearch(e.target.value);
+        setPage(1); // Reset to first page on new search
+    };
+
+    const handlePageChange = (newPage) => {
+        setPage(newPage);
+    };
+
     return (
         <>
             <ToastContainer />
             <div className="flex justify-end p-4">
+                <input
+                    type="text"
+                    placeholder="Search Company"
+                    value={search}
+                    onChange={handleSearchChange}
+                    className="border p-2 rounded-lg"
+                />
                 <button
                     onClick={() => { setIsModalOpen(true); setIsEditing(false); }}
-                    className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition"
+                    className="px-6 py-2 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition ml-4"
                 >
                     Add Company
                 </button>
@@ -198,114 +214,131 @@ const CompanyTable = () => {
                     ) : error ? (
                         <p className="text-red-500 text-center">Failed to load companies.</p>
                     ) : (
-                        <table className="table-auto w-full border border-gray-300 shadow-lg rounded-lg overflow-hidden">
-                            <thead className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
-                                <tr>
-                                    <th className="py-3 px-4 text-left text-sm font-semibold">Sl No</th>
-                                    <th className="py-3 px-4 text-left text-sm font-semibold">Company Name</th>
-                                    <th className="py-3 px-4 text-left text-sm font-semibold">Email</th>
-                                    <th className="py-3 px-4 text-left text-sm font-semibold">Website</th>
-                                    <th className="py-3 px-4 text-left text-sm font-semibold">Logo</th>
-                                    <th className="py-3 px-4 text-left text-sm font-semibold">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {companies?.data?.map((company, index) => (
-                                    <tr key={company.id} className="bg-white border-b border-gray-200 hover:bg-gray-100 transition duration-300">
-                                        <td className="py-3 px-4">{index + 1}</td>
-                                        <td className="py-3 px-4">{company.name}</td>
-                                        <td className="py-3 px-4">{company.email}</td>
-                                        <td className="py-3 px-4">{company.website}</td>
-                                        <td className="py-3 px-4">
-                                            <img style={{ width: '50px', height: '50px' }} src={company.logo} alt={company.name} />
-                                        </td>
-                                        <td className="py-3 px-4">
-                                            <button onClick={() => handleEditClick(company)} className="text-blue-500 hover:underline">
-                                                <FaEdit/>
-                                            </button>
-                                            <button onClick={() => handleDeleteCompany(company.id)} className="text-red-500 hover:underline ml-4">
-                                                <MdDelete/>
-                                            </button>
-                                        </td>
+                        <>
+                            <table className="table-auto w-full border border-gray-300 shadow-lg rounded-lg overflow-hidden">
+                                <thead className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+                                    <tr>
+                                        <th className="py-3 px-4 text-left text-sm font-semibold">Sl No</th>
+                                        <th className="py-3 px-4 text-left text-sm font-semibold">Company Name</th>
+                                        <th className="py-3 px-4 text-left text-sm font-semibold">Email</th>
+                                        <th className="py-3 px-4 text-left text-sm font-semibold">Website</th>
+                                        <th className="py-3 px-4 text-left text-sm font-semibold">Logo</th>
+                                        <th className="py-3 px-4 text-left text-sm font-semibold">Actions</th>
                                     </tr>
+                                </thead>
+                                <tbody>
+                                    {companies?.data?.map((company, index) => (
+                                        <tr key={company.id} className="bg-white border-b border-gray-200 hover:bg-gray-100 transition duration-300">
+                                            <td className="py-3 px-4">{index + 1}</td>
+                                            <td className="py-3 px-4">{company.name}</td>
+                                            <td className="py-3 px-4">{company.email}</td>
+                                            <td className="py-3 px-4">{company.website}</td>
+                                            <td className="py-3 px-4">
+                                                <img style={{ width: '50px', height: '50px' }} src={company.logo} alt={company.name} />
+                                            </td>
+                                            <td className="py-3 px-4">
+                                                <button onClick={() => handleEditClick(company)} className="text-blue-500 hover:underline">
+                                                    <FaEdit/>
+                                                </button>
+                                                <button onClick={() => handleDeleteCompany(company.id)} className="text-red-500 hover:underline ml-2">
+                                                    <MdDelete/>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+
+                            {/* Pagination Controls */}
+                            <div className="flex justify-center mt-4 space-x-2">
+                                {[...Array(companies.pagination.totalPages)].map((_, i) => (
+                                    <button
+                                        key={i}
+                                        onClick={() => handlePageChange(i + 1)}
+                                        className={`px-4 py-2 rounded-lg ${page === i + 1 ? 'bg-blue-500 text-white' : 'bg-gray-300'}`}
+                                    >
+                                        {i + 1}
+                                    </button>
                                 ))}
-                            </tbody>
-                        </table>
+                            </div>
+                        </>
                     )}
                 </div>
             </div>
 
-            {/* Modal */}
+            {/* Add/Edit Modal */}
             {isModalOpen && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-                    <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg w-full">
-                        <h3 className="text-xl font-semibold mb-4">{isEditing ? 'Edit Company' : 'Add New Company'}</h3>
-                        <div className="space-y-4">
-                            <input
-                                type="text"
-                                name="name"
-                                placeholder="Company Name"
-                                value={formValues.name}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border border-gray-300 rounded"
-                            />
-                            {errors.name && <p className="text-red-500">{errors.name}</p>}
-
-                            <input
-                                type="email"
-                                name="email"
-                                placeholder="Email"
-                                value={formValues.email}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border border-gray-300 rounded"
-                            />
-                            {errors.email && <p className="text-red-500">{errors.email}</p>}
-
-                            <input
-                                type="text"
-                                name="website"
-                                placeholder="Website"
-                                value={formValues.website}
-                                onChange={handleInputChange}
-                                className="w-full p-2 border border-gray-300 rounded"
-                            />
-                            {errors.website && <p className="text-red-500">{errors.website}</p>}
-
-                            <input
-                                type="file"
-                                name="imageUrl"
-                                multiple
-                                onChange={handleImageChange}
-                                className="w-full p-2 border border-gray-300 rounded"
-                            />
-                            {errors.imageUrl && <p className="text-red-500">{errors.imageUrl}</p>}
-
-                            {/* Display existing or new logo when editing */}
-                            <div>
-                                <p className="text-gray-500">Logo:</p>
-                                {newLogoPreview ? (
-                                    <img src={newLogoPreview} alt="New Logo Preview" style={{ width: '100px', height: '100px' }} />
-                                ) : (
-                                    isEditing && existingLogo && (
-                                        <img src={existingLogo} alt="Current Logo" style={{ width: '100px', height: '100px' }} />
-                                    )
-                                )}
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg w-96">
+                        <h2 className="text-2xl font-semibold mb-4">{isEditing ? 'Edit Company' : 'Add Company'}</h2>
+                        <form>
+                            <div className="mb-4">
+                                <label className="block text-sm font-semibold mb-1">Name</label>
+                                <input
+                                    type="text"
+                                    name="name"
+                                    value={formValues.name}
+                                    onChange={handleInputChange}
+                                    className="w-full p-2 border rounded-lg"
+                                />
+                                {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
                             </div>
-                        </div>
-                        <div className="flex justify-end space-x-4 mt-4">
-                            <button
-                                onClick={closeAndResetModal}
-                                className="px-4 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={isEditing ? handleUpdateCompany : handleAddCompany}
-                                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-                            >
-                                {isEditing ? 'Update' : 'Submit'}
-                            </button>
-                        </div>
+                            <div className="mb-4">
+                                <label className="block text-sm font-semibold mb-1">Email</label>
+                                <input
+                                    type="email"
+                                    name="email"
+                                    value={formValues.email}
+                                    onChange={handleInputChange}
+                                    className="w-full p-2 border rounded-lg"
+                                />
+                                {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-sm font-semibold mb-1">Website</label>
+                                <input
+                                    type="text"
+                                    name="website"
+                                    value={formValues.website}
+                                    onChange={handleInputChange}
+                                    className="w-full p-2 border rounded-lg"
+                                />
+                                {errors.website && <p className="text-red-500 text-sm">{errors.website}</p>}
+                            </div>
+                            <div className="mb-4">
+                                <label className="block text-sm font-semibold mb-1">Logo</label>
+                                <input
+                                    type="file"
+                                    name="imageUrl"
+                                    onChange={handleImageChange}
+                                    className="w-full p-2 border rounded-lg"
+                                    accept="image/*"
+                                />
+                                {newLogoPreview && (
+                                    <img src={newLogoPreview} alt="New Logo Preview" className="mt-2 w-20 h-20" />
+                                )}
+                                {existingLogo && !newLogoPreview && (
+                                    <img src={existingLogo} alt="Existing Logo" className="mt-2 w-20 h-20" />
+                                )}
+                                {errors.imageUrl && <p className="text-red-500 text-sm">{errors.imageUrl}</p>}
+                            </div>
+                            <div className="flex justify-end space-x-2">
+                                <button
+                                    type="button"
+                                    onClick={closeAndResetModal}
+                                    className="px-4 py-2 bg-gray-300 rounded-lg"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={isEditing ? handleUpdateCompany : handleAddCompany}
+                                    className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                                >
+                                    {isEditing ? 'Update' : 'Add'}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}
